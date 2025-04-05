@@ -33,7 +33,7 @@ public class mergesort {
         for(int j=0; j<n2; j++){
             R[j] = arr[m+1+j];
         }
-
+ 
         //add elements in arr by comparing 
         //index for 1st and 2nd array
         int i=0;
@@ -42,7 +42,7 @@ public class mergesort {
         int k = l;
 
         while(i<n1 && j<n2) {
-            if(L[i] <=R[j]){
+            if(L[i] <= R[j]){
                 arr[k]=L[i];
                 i++;
             }
@@ -78,3 +78,4 @@ public class mergesort {
         }
     }
 }
+
