@@ -1,41 +1,62 @@
-public class test {
+pipeline {
+    agent any
 
-    public static void nQueens(char board[][], int row) {
-        // base
-        if (row == board.length) {
-            printBoard(board);
-            return;
+ 
+
+    environment {
+        HEADLESS_MODE = 'true' // Define headless mode in Jenkins pipeline
+        DISPLAY = ':99' // Set display variable for headless execution
+    }
+
+ 
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', credentialsId: 'gitlab-credentials', url: 'http://localhost/user1/myseleniumtest.git'
+            }
         }
-        // column loop
-        for (int j = 0; j < board.length; j++) {
-            System.out.print("\nj is: " + j);
-            
-            board[row][j] = 'Q';
-            nQueens(board, row + 1);    // function call
-            board[row][j] = 'x';    // backtracking step
 
+ 
+
+        stage('Setup Headless Environment') {
+            steps {
+                script {
+                    echo "Starting virtual display (Xvfb)..."
+                    sh 'Xvfb :99 -screen 0 1920x1080x24 &'
+                    sh 'export DISPLAY=:99'
+                }
+            }
+        }
+
+ 
+
+        stage('Compile Java') {
+            steps {
+                script {
+                    echo 'Compiling Java code with Selenium dependencies...'
+                    sh 'javac -cp .:/selenium/Selenium4.11/* -d . src/WebAutomation.java'
+                }
+            }
+        }
+
+ 
+
+        stage('Run Application') {
+            steps {
+                script {
+                    echo "Running Selenium with headless mode: ${env.HEADLESS_MODE}..."
+                    sh "export DISPLAY=:99 && java -cp .:/selenium/Selenium4.11/* WebAutomation"
+                }
+            }
         }
     }
 
-    public static void printBoard(char board[][]) {
-        System.out.println("\nchess board-");
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                System.out.print(board[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
+ 
 
-    public static void main(String[] args) {
-        int n = 2;
-        char board[][] = new char[n][n];
-        // initialize
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                board[i][j] = 'x';
-            }
+    post {
+        always {
+            echo 'Pipeline execution complete.'
         }
-        nQueens(board, 0);
     }
 }
